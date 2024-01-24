@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+    php:
+        container_name: october-php-edu-container
+        build:
+            context: docker/php
+            dockerfile: dev/Dockerfile
+        restart: always
+        env_file:
+            - .env
+        volumes:
+            - ./docker/php/dev/log:/var/www/log
+            - ./docker/php/dev/configuration:/usr/local/etc/php
+            - .:/app
+            - ./docker/php:/etc/cron.d
+        networks:
+            - net-edu-october
+
+    http:
+        container_name: october-http-edu-container
+        build:
+            context: docker/http
+            dockerfile: Dockerfile
+        volumes:
+            - ./docker/http/conf.d:/etc/nginx/conf.d
+            - .:/app
+        networks:
+            - net-edu-october
+
+    db:
+        container_name: october-db-edu-container
+        image: mysql:latest
+        restart: always
+        volumes:
+            - db-edu-data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        networks:
+            - net-edu-october
+
+volumes:
+    db-edu-data:
+
+networks:
+    net-edu-october:
